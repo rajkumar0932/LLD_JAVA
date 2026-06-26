@@ -143,3 +143,49 @@ If the builder's fields were `final`, `addSpices()` couldn't reassign them and c
 - **Builder fields `final`?** No — they must stay mutable so `.addX()` chaining works.
 - **Why `return this`?** So the next method in the chain has the same builder to act on.
 - **Why a private `Maggie` constructor?** Funnel all creation through the builder; guarantees complete, valid objects.
+
+---
+
+## Common errors & lessons (learned while building this file)
+
+These are the real mistakes hit while writing `builder.java`, with the takeaway from each.
+
+### 1. "No enclosing instance of type `builder`" on `new Maggie(this)`
+
+- **Cause:** `Maggie` was a *non-static* inner class. Inner classes need an instance of the outer class to exist — but `execute()` lives in the `static` builder, where no outer instance exists.
+- **Fix:** make `Maggie` `static` too → `static class Maggie`.
+- **Lesson:** in the Builder pattern, **both nested classes must be `static`** so they can be created independently of the outer class.
+
+### 2. Fields show a "never used / never read" warning (yellow squiggle)
+
+- **Cause:** the fields are *assigned* in the constructor but never *read* anywhere. Writing a value ≠ using it; something has to read it back.
+- **Fix:** add a `toString()` (or getters) that reads every field.
+- **Lesson:** **yellow = warning** (code still runs), **red = error** (won't compile). Assigning a field does not count as "using" it.
+
+### 3. `new IngredientsRequired(...)` undefined from `main`
+
+- **Cause:** two issues — missing `new`, and the class is nested inside `Maggie`, so its real name is `Maggie.IngredientsRequired`.
+- **Fix:** `new Maggie.IngredientsRequired(true, true)`.
+- **Lesson:** `static` removes the need for an outer **instance**, but not the need to **name the path** to the class.
+
+### 4. When to use `new`
+
+- **Constructor → use `new`** (`new Maggie.IngredientsRequired(...)`) — it creates a brand-new object.
+- **Method → no `new`** (`.addWater(true)`, `.execute()`) — it acts on an object that already exists.
+- **Lesson:** a whole builder chain has exactly **one `new`** (at the start); everything after is method calls.
+
+### 5. `Maggie.toString()` doesn't print the meal
+
+- **Cause:** `toString()` was called on the **class**, and the built object was thrown away (not stored).
+- **Fix:** store the result, then print it:
+  ```java
+  Maggie meal = new Maggie.IngredientsRequired(true, true).addWater(true).execute();
+  System.out.println(meal);   // println auto-calls toString()
+  ```
+- **Lesson:** `toString()` describes a **specific object**, not the class. Catch what `execute()` returns in a variable first.
+
+### 6. `meal` never prints when running the program
+
+- **Cause:** `main` was `public void main(...)` — not `static`. The JVM only runs `public static void main(String[] args)`.
+- **Fix:** add `static` → `public static void main(String[] str)`.
+- **Lesson:** at program start **no object exists yet**, so `main` must be `static` (the exact entry-point signature) or it never runs.
