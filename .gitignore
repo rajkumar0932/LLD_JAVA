@@ -1,0 +1,12 @@
+# Compiled Java class files
+*.class
+
+# VS Code Code Runner temp file
+**/tempCodeRunnerFile.java
+
+# IDE / build folders
+.vscode/
+.idea/
+out/
+bin/
+target/
