@@ -160,6 +160,52 @@ giveCloneEmail ──▶ emailClone() (public) ──▶ super.clone() (protecte
 
 Call the **public** `emailClone()`, not the protected `clone()`.
 
+### Q13. Store the registry by interface or by concrete class?
+
+```java
+Map<String, EmailTemplate> templates;   // ✅ by INTERFACE (reference code)
+HashMap<String, CloneEmail> mp;         // ❌ by CONCRETE class (less flexible)
+```
+
+Storing by the **interface** can hold ANY implementation in one registry — `WelcomeEmail`, `DiscountEmail`, `FeatureUpdateEmail`... Storing by the **concrete class** locks the map to one type, which defeats the registry's purpose (a library of different prototypes).
+
+```
+Map<String, EmailTemplate>          HashMap<String, CloneEmail>
+   ├── WelcomeEmail                    └── only CloneEmail
+   ├── DiscountEmail                       (nothing else fits)
+   └── FeatureUpdateEmail
+```
+
+Same rule applies to **return types, parameters, and variable declarations** — prefer the interface:
+
+```java
+EmailTemplate e = registry.get("welcome");   // ✅ flexible
+CloneEmail    e = registry.get("welcome");   // ❌ locked to CloneEmail
+```
+
+A concrete map still compiles and runs for a single class — it just won't scale to a second email type.
+
+### Q14. "Program to an interface, not an implementation" — is it the D in SOLID?
+
+Not literally a SOLID letter — it's an older, broader **GoF (Gang of Four) design guideline**. But it is the foundation of, and most directly tied to, **D — the Dependency Inversion Principle**:
+
+> DIP: "High-level modules should not depend on low-level modules. Both should depend on **abstractions** (interfaces)."
+
+| | "Program to an interface" | Dependency Inversion (D) |
+|---|---|---|
+| Origin | GoF guideline (a practice) | SOLID (a formal principle) |
+| Says | use the interface type, not the concrete class | depend on abstractions, not concretions |
+
+It also quietly supports other SOLID letters:
+
+| SOLID | How it helps |
+|---|---|
+| **L** (Liskov) | any implementation can safely replace the interface |
+| **O** (Open/Closed) | add new implementations without changing existing code |
+| **D** (Dependency Inversion) | depend on the abstraction, not the concrete class |
+
+**Interview answer:** the SOLID principle it embodies is **Dependency Inversion (D)** (also enables O and L). Same lesson as Abstract Factory, where `CheckoutService` depended on the `RegionFactory` *interface*, not `IndiaFactory` directly.
+
 ---
 
 ## How Prototype compares to the other creational patterns
