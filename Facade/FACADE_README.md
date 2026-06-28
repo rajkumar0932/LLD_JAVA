@@ -39,6 +39,45 @@ Facade.main()
 
 ---
 
+## UML class diagram
+
+```
+ ┌────────────────────┐ ┌──────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌──────────────┐
+ │  Authentication    │ │    FoodOrder     │ │    Address     │ │    Payment     │ │   Receipt    │
+ │ - email: String    │ │ - food: String   │ │ - street:String│ │ - cost: int    │ │              │
+ │ - password: String │ │                  │ │                │ │                │ │              │
+ │ + AuthReq(): void  │ │ + FoodOrderName  │ │ + Address(str) │ │ + Payment(int) │ │ + info():void│
+ │ + info(): void     │ │ + info(): void   │ │ + info(): void │ │ + info(): void │ │              │
+ └─────────┬──────────┘ └────────┬─────────┘ └───────┬────────┘ └───────┬────────┘ └──────┬───────┘
+           │                     │                   │                  │                 │
+           ◆ composition         ◆                   ◆                  ◆                 ◆
+           │  (facade `new`s     │                   │                  │                 │
+           │   each part)        │                   │                  │                 │
+           └─────────────────────┴─────────┬─────────┴──────────────────┴─────────────────┘
+                                            │
+                              ┌─────────────────────────────┐
+                              │      FoodDeliveryFacade      │
+                              │ - auth: Authentication       │
+                              │ - foodOrder: FoodOrder       │
+                              │ - address: Address           │
+                              │ - payment: Payment           │
+                              │ - receipt: Receipt           │
+                              │ + FoodOrderDetails(...): void │
+                              └─────────────────────────────┘
+```
+
+**The one relationship type here — Composition ◆:**
+
+| Relationship | Between | UML | Why |
+|---|---|---|---|
+| **Composition** | `FoodDeliveryFacade` ◆→ each subsystem | filled diamond ◆ on the **facade** side | the facade `new`s every part **inside itself** (none passed in) → created inside = composition |
+
+> **The "who typed `new`?" test:** every subsystem object is built with `new` *inside* the facade (`new Authentication()`, `new Address(street)`, …). Created inside → **Composition ◆** (filled diamond), not aggregation (hollow ◇, which is for parts *passed in* from outside). Death test: destroy the facade → all five parts die with it. ✔
+>
+> Unlike Decorator (which had **two** links to its interface — is-a + has-a), the Facade has **no** inheritance/realization — it just **owns** the subsystem objects. One arrow type, five times.
+
+---
+
 ## The key mechanic — one method hides the sequence
 
 ```java
