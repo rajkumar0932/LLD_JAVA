@@ -11,7 +11,7 @@ class IndianTaxCalculator implements TaxCalculator
 }
 
 
-class Main {
+class OcpMain {
     public static void main (String[] arg){
         IndianTaxCalculator ind = new IndianTaxCalculator();
         System.out.println(ind.calculateTax(2000));

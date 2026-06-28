@@ -1,5 +1,5 @@
 import java.util.*;
-class Main {
+class GenericsMain {
     public static void main (String[] arg){
         ArrayList<String> list = new ArrayList<>();
 
