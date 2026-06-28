@@ -140,6 +140,64 @@ java Adaptor            # no "Adapter." prefix
 
 ---
 
+## Trick: association vs aggregation vs composition (UML)
+
+The fastest way to tell the four "has/uses" relationships apart — **two questions, in order**:
+
+```
+Q1: Is it stored as a FIELD?
+     NO  → Dependency      (just used inside a method)
+     YES → it's a HAS-A, go to Q2
+
+Q2: WHO created the object?  ("who typed new?")
+     created inside the class (new X())  → COMPOSITION ◆
+     passed in from outside (parameter)  → AGGREGATION ◇
+```
+
+### The code tell — look at the constructor
+
+| What you see | Relationship | UML |
+|---|---|---|
+| `X x` only as a param/local, no field | **Dependency** (uses) | dashed → |
+| field, two equal peers, no whole/part | **Association** (knows) | solid line |
+| `this.x = paramX;` (received in) | **Aggregation** (has, shared) | solid + hollow ◇ |
+| `this.x = new X();` (created inside) | **Composition** (owns) | solid + filled ◆ |
+
+### Applied to this file
+
+```java
+// COMPOSITION ◆ — handler CREATES the payPhone (new inside)
+payPhoneHandler(int balance) {
+    payphone = new payPhone(balance);
+}
+
+// AGGREGATION ◇ — gateway is PASSED IN from outside
+public choosingPaymentGateway(paymentGateway s) {
+    this.method = s;
+}
+```
+
+### The "death test" (aggregation vs composition, when unsure)
+
+> "If I destroy the whole, does the part die too?"
+- **Yes**, part is meaningless alone → **Composition ◆** (handler's `payPhone` exists only for it)
+- **No**, part lived before/after → **Aggregation ◇** (the passed-in gateway is independent)
+
+**Honest note:** association and aggregation are *identical in code* (`private X x;`). The difference is conceptual — aggregation has a clear whole/part; association is just two peers. Don't over-stress that boundary.
+
+### Cheat sheet
+
+```
+Not a field?          → Dependency   (uses)        dashed →
+Field, peers?         → Association  (knows)       solid line
+Field, passed in?     → Aggregation  (has, shared) solid + hollow ◇
+Field, created inside? → Composition  (owns)        solid + filled ◆
+```
+
+> **Killer trick: find the constructor.** `new` inside = **Composition ◆**. Passed as a parameter = **Aggregation ◇**. No field = **Dependency**.
+
+---
+
 ## When to use Adapter
 
 - You want to use an **existing/third-party class** whose interface doesn't match yours.
