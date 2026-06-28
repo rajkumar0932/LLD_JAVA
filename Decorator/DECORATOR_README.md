@@ -36,6 +36,50 @@ ExtraChesse ──wraps──▶ ExtraButter ──wraps──▶ PlainPizza
 
 ---
 
+## UML class diagram
+
+```
+                          ┌──────────────────┐
+                          │   «interface»    │
+                          │      Pizza       │
+                          │ + name(): String │
+                          │ + price(): int   │
+                          └──────────────────┘
+              realize ╱╲        ▲   ▲        ╱╲ realize
+          ┌╌╌╌╌╌╌╌╌╌╌    ╌╌╌╌╌╌╌┘   └╌╌╌╌╌╌╌    ╌╌╌╌╌╌╌╌╌┐
+          ┆ (implements)                       (implements) ┆
+ ┌────────────────┐  ┌────────────┐  ┌───────────┐         ┆
+ │  VeggiesPizza  │  │ NonvegPizza│  │ PlainPizza│         ┆
+ └────────────────┘  └────────────┘  └───────────┘         ┆
+                                                            ┆ realize
+                          ┌──────────────────────┐          ┆ (implements)
+                          │   «abstract class»   │◇╌╌╌╌╌╌╌╌╌╌┘
+            aggregation ◇─┤    PizzaDecorator    │
+          (has-a Pizza,   │  - name: Pizza       │
+           passed in)     │  PizzaDecorator(Pizza)│
+                          └──────────────────────┘
+                              ▲              ▲
+                    inherit  ╱ ╲   (extends) ╱ ╲
+                  ┌──────────────┐      ┌──────────────┐
+                  │  ExtraButter │      │ ExtraChesse  │
+                  │ + name():Str │      │ + name():Str │
+                  │ + price():int│      │ + price():int│
+                  └──────────────┘      └──────────────┘
+```
+
+**The three relationships (don't mix them up):**
+
+| Relationship | Between | UML | Why |
+|---|---|---|---|
+| **Realization** | concrete pizzas → `Pizza` | dashed line + hollow ▷ | they `implements Pizza` |
+| **Realization** | `PizzaDecorator` → `Pizza` | dashed line + hollow ▷ | the decorator **also** `implements Pizza` |
+| **Aggregation** | `PizzaDecorator` ◇→ `Pizza` | hollow diamond ◇ on decorator side | holds a `Pizza` field, **passed in** (not `new`-ed) → aggregation, not composition |
+| **Inheritance** | `ExtraButter`/`ExtraChesse` → `PizzaDecorator` | solid line + hollow ▷ | they `extends PizzaDecorator` |
+
+> **The key subtlety:** `PizzaDecorator` has **two** links to `Pizza` — it **is-a** `Pizza` (realization, so it can be wrapped again) **and has-a** `Pizza` (aggregation, the thing it wraps). That double relationship is the whole reason decorators stack. A diagram that draws only the has-a is incomplete.
+
+---
+
 ## The key mechanic — "is-a AND has-a"
 
 A decorator is special because it does **both** at once:
