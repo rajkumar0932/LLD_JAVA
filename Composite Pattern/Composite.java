@@ -1,102 +1,90 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-// COMPONENT: the shared interface — both a single item and a group implement it,
-// so the client can treat them identically.
-interface CartItem {
-    double getPrice();
-    void display(String indent);
+interface Itemcart{
+    void name ();
+     int price();
 }
+class Product implements Itemcart {
+    String  product ;
+    int cost;
 
-// LEAF: an atomic object. Has no children.
-class Product implements CartItem {
-    private String name;
-    private double price;
+    Product(String  product , int cost){
+        this.product=product;
+        this.cost =cost;
 
-    public Product(String name, double price) {
-        this.name = name;
-        this.price = price;
+    }
+    public void name (){
+        System.out.println("this product is " +product);
+    }
+    public int price(){
+        return cost;
     }
 
-    @Override
-    public double getPrice() {
-        return price;
-    }
-
-    @Override
-    public void display(String indent) {
-        System.out.println(indent + "Product: " + name + " - Rs " + price);
-    }
 }
+class ProductBundles implements Itemcart {
+   private  String name;
+    List<Itemcart>Products = new ArrayList<>() ;
+        
+  
 
-// COMPOSITE: a container. Holds CartItems — which can be Products (leaves)
-// OR other ProductBundles (nested composites). That recursion is the whole point.
-class ProductBundle implements CartItem {
-    private String bundleName;
-    private List<CartItem> items = new ArrayList<>();
+    ProductBundles( String name ){
+    this.name=name;
 
-    public ProductBundle(String bundleName) {
-        this.bundleName = bundleName;
     }
+    public  void add (Itemcart product){
+        Products.add(product);
 
-    public void addItem(CartItem item) {   // accepts ANY CartItem — leaf or composite
-        items.add(item);
     }
-
-    @Override
-    public double getPrice() {
-        double total = 0;
-        for (CartItem item : items) {      // delegate to children, no type checks
-            total += item.getPrice();
-        }
-        return total;
-    }
-
-    @Override
-    public void display(String indent) {
-        System.out.println(indent + "Bundle: " + bundleName);
-        for (CartItem item : items) {
-            item.display(indent + "  ");    // recurses naturally for nested bundles
+    public void name (){
+        System.out.println("this productBundle  is " +name);
+        for(Itemcart item : Products){
+            item.name();
         }
     }
-}
+    public int price(){
+        int cost=0;
+       for(int i=0;i<Products.size();i++){
+        cost+=Products.get(i).price();
 
+       }
+       return cost;
+    }
+
+}
 public class Composite {
-    public static void main(String[] args) {
-        // Individual products (leaves)
-        CartItem book    = new Product("Atomic Habits", 499);
-        CartItem phone   = new Product("iPhone 15", 79999);
-        CartItem earbuds = new Product("AirPods", 15999);
-        CartItem charger = new Product("20W Charger", 1999);
+    public  static void main(String [] str){
+    Itemcart book1 = new Product("Book1", 400);
+    Itemcart book2 = new Product("Book2", 200);
+    Itemcart book3 = new Product("Book3", 500);
+    Itemcart book4 = new Product("Book4", 350);
+     Itemcart book5 = new Product("Book1", 400);
+    Itemcart book6 = new Product("Book2", 200);
+    Itemcart book7 = new Product("Book3", 500);
+    Itemcart book8 = new Product("Book4", 350);
+   System.out.println(book4.price());
+    ProductBundles books1 = new ProductBundles("Books");
+    ProductBundles books2 = new ProductBundles("Books");
+    books1.add(book1);
+    books1.add(book2);
+    books1.add(book3);
+    books2.add(book5);
+    books2.add(book6);
+    books2.add(book7);
+ 
+    System.out.println(books1.price());
+    ProductBundles Library = new ProductBundles("Library");
+    Library.add(books1);
+    Library.add(books2);
+    Library.add(book8);
+    System.out.println(Library.price());
 
-        // A bundle of leaves
-        ProductBundle iphoneCombo = new ProductBundle("iPhone Essentials Combo");
-        iphoneCombo.addItem(phone);
-        iphoneCombo.addItem(earbuds);
-        iphoneCombo.addItem(charger);
 
-        ProductBundle schoolKit = new ProductBundle("Back to School Kit");
-        schoolKit.addItem(new Product("Notebook Pack", 249));
-        schoolKit.addItem(new Product("Pen Set", 99));
 
-        // RECURSION: a bundle that CONTAINS another bundle (composite inside composite)
-        ProductBundle festiveMegaPack = new ProductBundle("Festive Mega Pack");
-        festiveMegaPack.addItem(iphoneCombo);   // a bundle...
-        festiveMegaPack.addItem(book);          // ...next to a single product
-        festiveMegaPack.addItem(schoolKit);     // ...next to another bundle
-
-        // The cart is a List<CartItem> — no List<Object>, no instanceof
-        List<CartItem> cart = new ArrayList<>();
-        cart.add(book);
-        cart.add(iphoneCombo);
-        cart.add(festiveMegaPack);   // nested tree handled the same as a single book
-
-        System.out.println("Your Amazon Cart:");
-        double total = 0;
-        for (CartItem item : cart) {  // one loop treats leaf and tree identically
-            item.display("  ");
-            total += item.getPrice();
-        }
-
-        System.out.println("\nTotal: Rs " + total);
     }
+   
+    
+
+
+    
 }
