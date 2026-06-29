@@ -6,6 +6,33 @@ This is the first **structural** pattern (Builder/Factory/Prototype were *creati
 
 ---
 
+## Why we needed it — the problem
+
+Your client speaks one interface (`paymentGateway`: `type()`, `sendMoney()`), but the class you must use (`payPhone`) speaks a different language (`print()`, `deductMoney()`). The names don't line up, so it simply won't plug in:
+
+```java
+paymentGateway pg = new payPhone();   // ❌ payPhone doesn't implement paymentGateway
+pg.sendMoney();                       // ...and it has no sendMoney() anyway
+```
+
+You can't always fix this at the source — `payPhone` might be a third-party/legacy class you're not allowed to edit, and rewriting the client to match it would couple it to that one vendor.
+
+## How it solves the problem
+
+Insert a **translator** (`payPhoneHandler`) that *implements* the interface the client wants and *wraps* the incompatible class, forwarding each call to the matching method:
+
+```java
+class payPhoneHandler implements paymentGateway {
+    private payPhone adaptee = new payPhone();
+    public void sendMoney() { adaptee.deductMoney(); }   // translate the call
+    public void type()      { adaptee.print(); }
+}
+```
+
+Now the client uses `payPhone`'s behaviour through its own interface — **neither the client nor the legacy class changes.** Swap in another vendor later by writing another adapter.
+
+---
+
 ## The idea
 
 > **A wrapper that translates one interface into another**, so two incompatible classes can work together — without modifying either.

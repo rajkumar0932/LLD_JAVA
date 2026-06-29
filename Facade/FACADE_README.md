@@ -6,6 +6,36 @@ This is a **structural** pattern (like Adapter & Decorator — about *connecting
 
 ---
 
+## Why we needed it — the problem
+
+"Order food" is really **five subsystem calls in a strict order**. If the client does it itself, it has to know every class and the exact sequence — and one wrong order breaks everything:
+
+```java
+Authentication auth = new Authentication();
+auth.AuthenticationRequired(email, password);   // must be first
+FoodOrder order = new FoodOrder();
+order.FoodOrderName(food);
+Payment pay = new Payment(cost);                 // ❌ paid before recording address?
+Address addr = new Address(street);
+Receipt r = new Receipt();
+r.info();
+```
+
+Every caller repeats this dance, and any change to the flow means editing all of them. The client is coupled to five classes it shouldn't care about.
+
+## How it solves the problem
+
+Put one **entry-point class** (`FoodDeliveryFacade`) in front of the subsystem. It owns the parts and runs the whole sequence inside a single method, so the client makes **one call**:
+
+```java
+new FoodDeliveryFacade()
+    .FoodOrderDetails("raj@gmail.com", "secret123", "Paneer Tikka", "MG Road", 350);
+```
+
+The five-step order now lives in **one place**. Callers don't know the subsystem exists, and you can change the internal flow without touching a single client — the waiter handles the kitchen.
+
+---
+
 ## The idea
 
 > **A single entry-point class that wires together a messy subsystem**, so callers deal with one friendly method instead of many objects and a fragile call order.

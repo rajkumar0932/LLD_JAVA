@@ -4,6 +4,32 @@ Notes specific to [builder.java](builder.java): a `Maggie` object built via an i
 
 ---
 
+## Why we needed it — the problem
+
+`Maggie` has a few required parts and several optional ones (water, spices, …). With plain constructors you end up with a **telescoping** mess — one overload per combination — and call sites that are impossible to read:
+
+```java
+new Maggie(true, true, false, true);   // ❌ which true is which? oil? water? spices?
+new Maggie(true, true);                // ...and a new constructor for every combo of optionals
+```
+
+Making the fields settable instead (`setWater()`, `setSpices()`) fixes readability but leaves the object **mutable** and lets callers forget required steps, producing a half-built `Maggie`.
+
+## How it solves the problem
+
+Move construction into a separate **mutable builder** (`IngredientsRequired`): required parts go in its constructor, optionals are set via **chained** methods that each `return this`, and a final `execute()` produces the **immutable** `Maggie`:
+
+```java
+Maggie meal = new Maggie.IngredientsRequired(true, true)  // required, named by position once
+                  .addWater(true)                         // optional, self-documenting
+                  .addSpices(true)
+                  .execute();                             // freeze → immutable result
+```
+
+Readable, no constructor explosion, required fields enforced, and the finished object is frozen (`final` fields). That **mutable-scratchpad → immutable-result** split is the heart of Builder.
+
+---
+
 ## The structure at a glance
 
 ```

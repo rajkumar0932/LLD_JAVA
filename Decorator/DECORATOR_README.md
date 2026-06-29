@@ -6,6 +6,35 @@ This is a **structural** pattern (like Adapter — about *connecting* objects, n
 
 ---
 
+## Why we needed it — the problem
+
+You want to add optional extras to a pizza (extra butter, extra cheese, …) in **any combination**. Doing it with subclasses explodes: every combo needs its own class.
+
+```java
+class PlainPizza {}
+class PlainPizzaWithButter {}
+class PlainPizzaWithCheese {}
+class PlainPizzaWithButterAndCheese {}   // ❌ N extras → 2^N classes
+class VeggiesPizzaWithButterAndCheese {} // ...and repeat for every base pizza
+```
+
+And it's all fixed at **compile time** — you can't decide at runtime "add cheese only if the customer asks."
+
+## How it solves the problem
+
+Make each extra a **wrapper that has the same type as what it wraps** (`PizzaDecorator implements Pizza` **and holds a `Pizza`**). Each layer adds its bit and forwards the rest, so wrappers **stack** freely at runtime:
+
+```java
+Pizza p = new PlainPizza();
+p = new ExtraButter(p);     // wrap
+p = new ExtraChesse(p);     // wrap the wrapped — each is still a Pizza
+p.price();                  // 150 + 50 + 40 = 240, computed through the chain
+```
+
+Any combination, decided at runtime, with **no subclass explosion** — because a decorator doesn't care whether it's holding a plain pizza or an already-decorated one.
+
+---
+
 ## The idea
 
 > **A wrapper that has the same type as the thing it wraps**, so you can stack wrappers to keep adding behaviour — each layer adds a bit and forwards the rest.

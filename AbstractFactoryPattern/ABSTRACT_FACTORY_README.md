@@ -4,6 +4,34 @@ Notes for [AbstractFactory.java](AbstractFactory.java): each **country** fields 
 
 ---
 
+## Why we needed it — the problem
+
+The objects come in **families that must match**: an India country object belongs with India's cricket team *and* India's football team. If the client `new`s each piece itself, nothing stops it from mixing families:
+
+```java
+Country c = new India();
+CricketTeam ct = new USACricket();      // ❌ India country + USA cricket — mismatched, but compiles
+FootballTeam ft = new IndianFootball();
+```
+
+The client is also coupled to every concrete class (`new India()`, `new USACricket()`, …), so adding a new country means editing client code everywhere these are created.
+
+## How it solves the problem
+
+Put the whole family behind **one factory per family** (`IndianContigent`, `USAContigent`), each promising a `Country` + `CricketTeam` + `FootballTeam`. The client takes *any* `Contigent` and never names a concrete class:
+
+```java
+void setup(Contigent c) {              // doesn't know or care which country
+    Country country = c.createCountry();
+    CricketTeam cricket = c.createCricket();   // guaranteed same family
+    FootballTeam football = c.createFootball();
+}
+```
+
+Because one factory builds the entire set, **a mismatched family is impossible**, and adding a new country = one new factory class, with zero changes to the client.
+
+---
+
 ## The idea
 
 > **A factory that produces a whole matching family of objects** — without the caller knowing the concrete classes.

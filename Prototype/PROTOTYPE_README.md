@@ -4,6 +4,32 @@ Notes for [Prototype.java](Prototype.java): clone a ready-made object instead of
 
 ---
 
+## Why we needed it — the problem
+
+Some objects are **expensive to build from scratch** — a heavy constructor that hits disk/DB/network, or a lot of fixed setup. When you need many near-identical copies (e.g. the same email template, just a different name), rebuilding each one repeats all that cost and setup:
+
+```java
+EmailTemplate e1 = new CloneEmail();   // ❌ runs the whole expensive load every time
+e1.load();                             //    even though e1..e10 are 99% identical
+EmailTemplate e2 = new CloneEmail();
+e2.load();
+```
+
+The client also has to know the concrete class and re-run the full initialization for every instance.
+
+## How it solves the problem
+
+Build the object **once**, then **clone** it for each copy and tweak only what differs:
+
+```java
+EmailTemplate copy = registry.getClone("welcome");  // copies the ready-made prototype
+copy.showEmail();                                    // no expensive rebuild
+```
+
+`clone()` duplicates the already-initialized object (`(CloneEmail) super.clone()`), so the costly setup runs a single time. A registry hands out copies, so the client never `new`s the concrete class — it's the **photocopier**: write once, copy many, change only the name.
+
+---
+
 ## The idea
 
 > **Instead of building a new object from scratch, copy (clone) an existing one and tweak it.**
