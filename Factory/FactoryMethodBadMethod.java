@@ -27,6 +27,6 @@ class PizzaFactory{
         }
     }
 }
-public class FactoryMethod {
+public class FactoryMethodBadMethod {
 
 }

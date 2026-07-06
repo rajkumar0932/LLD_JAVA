@@ -36,7 +36,7 @@ class Payment{
         this.cost=cost;
     }
     public void info(){
-        System.out.println("Payment done");
+        System.out.println("Payment done"+ cost);
     }
 }
 

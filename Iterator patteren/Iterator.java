@@ -34,7 +34,7 @@ interface  VideoIterator{
 class VideoplayLoopIterator  implements VideoIterator{
    private  int size=0;
    private List<Video> videoPlaylist = new ArrayList <>();
-   VideoplayLoopIterator(  List<Video> videoPlaylist){
+   VideoplayLoopIterator(List<Video> videoPlaylist){
   
     this.videoPlaylist =videoPlaylist;
  }

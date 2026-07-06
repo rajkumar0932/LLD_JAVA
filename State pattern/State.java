@@ -107,7 +107,7 @@ public class State {
         phase.nextPhase();
         phase.nameCurrentPhase();
         phase.drop();
-         phase.nameCurrentPhase();
+        phase.nameCurrentPhase();
 
 
     }

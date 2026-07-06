@@ -32,7 +32,7 @@ public class Proxy {
     public static void main (String [] str){
         DownloadVideoProxy down = new DownloadVideoProxy();
         System.out.println(down.download("www.jkdd.com"));
-         System.out.println(down.download("www.jkdd.com"));
+        System.out.println(down.download("www.jkdd.com"));
     }
     
 }

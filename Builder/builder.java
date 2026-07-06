@@ -1,5 +1,4 @@
-public class builder {
-    static class Maggie {
+class Maggie {
         // compulsary
         private  final Boolean ingredient;
         private  final Boolean oil;
@@ -82,6 +81,8 @@ public class builder {
         }
 
     }
+public class builder {
+     
 
     public static void main(String[] str) {
        Maggie meal = new Maggie.IngredientsRequired(true,true).addWater(true).execute();

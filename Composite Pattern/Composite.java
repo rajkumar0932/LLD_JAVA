@@ -24,7 +24,7 @@ class Product implements Itemcart {
 }
 class ProductBundles implements Itemcart {
    private  String name;
-    List<Itemcart>Products = new ArrayList<>() ;
+   private  List<Itemcart>Products = new ArrayList<>() ;
         
   
 

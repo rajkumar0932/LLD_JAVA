@@ -34,7 +34,7 @@ class Square extends Rectangle{
     }
 }
 
-public class NotFollowing {
+public class  notFollowing {
     public static void main (String [] args){
 
     Rectangle r1 = new Square();
