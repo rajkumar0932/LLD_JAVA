@@ -1,8 +1,8 @@
 # Locks in Java — Quick Guide
 
-Six small demos of the locking tools in `java.util.concurrent`, from the basic lock up to
-read-write locks and semaphores. Each file is one idea. The running theme: **how a thread
-waits for a shared resource, and who is allowed to release it.**
+Small demos of the locking tools in `java.util.concurrent`, from the basic lock up to
+read-write locks, semaphores, and a deadlock (plus its fix). Each file is one idea. The running
+theme: **how a thread waits for a shared resource, and who is allowed to release it.**
 
 ## The whole folder in one table
 
@@ -14,6 +14,7 @@ waits for a shared resource, and who is allowed to release it.**
 | **Lock + Scheduler** | [ReenteredScheduler.java](ReenteredScheduler.java) | ⚠️ Learning trap: only the owner thread may unlock a `ReentrantLock`. |
 | **ReadWriteLock** | [ReadWrire.java](ReadWrire.java) | **Many readers together**, but a writer needs **exclusive** access. |
 | **Semaphore** | [Semephor.java](Semephor.java) | **N permits** — a counter with no owner; any thread can release. |
+| **Deadlock + fix** | [DeadLock.java](DeadLock.java) | Two locks in opposite order **hang forever**; lock **ordering** fixes it. |
 
 ---
 
@@ -98,6 +99,36 @@ sem.release();                      // free a slot  (count + 1)
 
 ---
 
+## 6. Deadlock — and how lock ordering fixes it
+📄 [DeadLock.java](DeadLock.java)
+
+Two threads each grab two locks in **opposite** order and freeze forever:
+
+```
+T1 holds a1, waits for a2  ─┐
+                            │  ← a cycle → deadlock
+T2 holds a2, waits for a1  ─┘
+```
+
+A deadlock needs **4 conditions** at once: mutual exclusion, hold-and-wait, no preemption, and
+**circular wait**. Break any one and it can't happen.
+
+**The fix — lock ordering:** give every lock a rank (here, `Account.id()`) and *always* acquire
+**lower rank first**. Then no thread ever holds a high lock while waiting for a low one, so the
+wait chain can't loop back → circular wait is impossible.
+
+```java
+Account first  = from.id() < to.id() ? from : to;   // always lock lower id first
+Account second = from.id() < to.id() ? to   : from;
+synchronized (first) { synchronized (second) { /* transfer */ } }
+```
+
+**Demo:** `runTransfers(false)` deadlocks (hangs); `runTransfers(true)` uses ordering and
+completes. Toggle the flag in `main`. *(The money math uses `from`/`to`; only the **locks** are
+reordered.)*
+
+---
+
 ## Which one do I use?
 
 ```
@@ -107,6 +138,7 @@ Lots of reads, few writes?           → ReentrantReadWriteLock
 Allow up to N at once?               → Semaphore
 ```
 
-## Two things that bite everyone here
+## Three things that bite everyone here
 1. **Always `unlock()` in a `finally`** — otherwise an exception leaks the lock forever.
 2. **`tryLock(t, unit)`, `sleep()`, and `join()` throw checked `InterruptedException`** — you must `try/catch` or `throws` it (the compiler forces you).
+3. **Grabbing 2+ locks? Always acquire them in the same global order** — opposite orders across threads is how deadlocks are born.
